@@ -6,21 +6,15 @@
   "extends": ["airbnb-base", "plugin:jest/recommended", "plugin:security/recommended", "plugin:prettier/recommended"],
   "plugins": ["jest", "security", "prettier"],
   "parserOptions": {
-    "es6": true,
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "ecmaVersion": 2018
   },
+  "parser": "babel-eslint",
   "rules": {
     "no-console": "error",
     "func-names": "off",
     "no-underscore-dangle": "off",
     "consistent-return": "off",
     "jest/expect-expect": "off",
-    "security/detect-object-injection": "off",
-    "no-unused-vars": 0
-  },
-  "parser": "babel-eslint"
+    "security/detect-object-injection": "off"
+  }
 }

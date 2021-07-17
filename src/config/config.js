@@ -20,7 +20,7 @@ const envVarsSchema = Joi.object()
       .description('minutes after which verify email token expires'),
     REDIS_HOST: Joi.string().required().description('Redis host'),
     REDIS_PORT: Joi.number().required().description('Redis port'),
-    ALLOW_ORIGINS: Joi.string().default('*').description('Allowed origins for CORS'),
+    ALLOW_ORIGINS: Joi.string().empty('').default('*').description('Allowed origins for CORS'),
   })
   .unknown();
 
@@ -52,5 +52,5 @@ module.exports = {
     host: envVars.REDIS_HOST,
     port: envVars.REDIS_PORT,
   },
-  allowOrgins: envVars.ALLOW_ORIGINS,
+  allowOrgins: envVars.ALLOW_ORIGINS ?? '*',
 };

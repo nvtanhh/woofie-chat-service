@@ -13,6 +13,7 @@ export const redisClient = new Redis({
 this.redisClient.on('error', function (error) {
   console.error(error);
 });
+
 this.redisClient.on('ready', () => {
   console.log('Connect to redis');
 });

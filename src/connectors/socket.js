@@ -1,4 +1,5 @@
 /* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 import { allowOrgins } from '../config/config';
 
