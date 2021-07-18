@@ -19,7 +19,7 @@ const defaultRoutes = [
 
 router.get('/ping', auth(), (req, res) => {
   // const message = `API called for user with scope '${req.claims.scope}' and role '${req.claims.role}'`;
-  res.status(200).json({ message: 'pong' });
+  res.status(200).json({ message: `pong ---  Hello ${req.user.uuid}` });
 });
 
 defaultRoutes.forEach((route) => {

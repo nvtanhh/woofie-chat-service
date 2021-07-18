@@ -3,7 +3,7 @@ const jwksRsa = require('jwks-rsa');
 const logger = require('./logger');
 const config = require('./config');
 // const { tokenTypes } = require('./tokens');
-const { User } = require('../models');
+// const { User } = require('../models');
 
 const jwtOptions = {
   // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint.
@@ -33,11 +33,11 @@ const jwtVerify = async (payload, done) => {
     // done(null, user);
 
     logger.info(`Verify user: ${payload}`);
-    if (payload && payload.sub) {
-      return done(null, payload);
+    if (!(payload && payload.sub)) {
+      return done(null, false);
     }
-
-    return done(null, false);
+    const user = payload.sub;
+    done(null, user);
   } catch (error) {
     done(error, false);
   }
