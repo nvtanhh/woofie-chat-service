@@ -48,6 +48,7 @@
   ],
   "dependencies": {
     "@withvoid/make-validation": "1.0.5",
+    "async": "^3.2.0",
     "babel-eslint": "^10.1.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
@@ -56,13 +57,16 @@
     "dotenv": "^10.0.0",
     "eslint-config-airbnb": "^18.2.1",
     "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
     "express-mongo-sanitize": "^2.0.0",
+    "express-oauth-jwt": "^1.1.0",
     "express-rate-limit": "^5.0.0",
     "helmet": "^4.1.0",
     "http-status": "^1.4.0",
     "ioredis": "^4.27.6",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^2.0.4",
     "moment": "^2.24.0",
     "mongoose": "^5.7.7",
     "morgan": "^1.9.1",
@@ -77,7 +81,8 @@
     "uuid": "^8.3.2",
     "validator": "^13.0.0",
     "winston": "^3.2.1",
-    "xss-clean": "^0.1.1"
+    "xss-clean": "^0.1.1",
+    "lodash.set": "^4.3.2"
   },
   "devDependencies": {
     "coveralls": "^3.0.7",

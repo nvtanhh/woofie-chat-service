@@ -1,23 +1,43 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
+const jwksRsa = require('jwks-rsa');
+const logger = require('./logger');
 const config = require('./config');
-const { tokenTypes } = require('./tokens');
+// const { tokenTypes } = require('./tokens');
 const { User } = require('../models');
 
 const jwtOptions = {
-  secretOrKey: config.jwt.secret,
+  // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint.
+  secretOrKeyProvider: jwksRsa.passportJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: config.jwt.jwksUri,
+  }),
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+
+  // Validate the audience and the issuer.
+  audience: config.jwt.audience,
+  issuer: config.jwt.issuer,
+  algorithms: config.jwt.algorithms,
 };
 
 const jwtVerify = async (payload, done) => {
   try {
-    if (payload.type !== tokenTypes.ACCESS) {
-      throw new Error('Invalid token type');
+    // if (payload.type !== tokenTypes.ACCESS) {
+    //   throw new Error('Invalid token type');
+    // }
+    // const user = await User.findById(payload.sub);
+    // if (!user) {
+    //   return done(null, false);
+    // }
+    // done(null, user);
+
+    logger.info(`Verify user: ${payload}`);
+    if (payload && payload.sub) {
+      return done(null, payload);
     }
-    const user = await User.findById(payload.sub);
-    if (!user) {
-      return done(null, false);
-    }
-    done(null, user);
+
+    return done(null, false);
   } catch (error) {
     done(error, false);
   }

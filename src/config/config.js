@@ -9,15 +9,10 @@ const envVarsSchema = Joi.object()
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT: Joi.number().default(3000),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
-    JWT_SECRET: Joi.string().required().description('JWT secret key'),
-    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
-    JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
-    JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number()
-      .default(10)
-      .description('minutes after which reset password token expires'),
-    JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
-      .default(10)
-      .description('minutes after which verify email token expires'),
+    JWT_JWKS_URI: Joi.string().required().description('JWKS url api endpoint'),
+    JWT_AUDIENCE: Joi.string().required(),
+    JWT_ISSUER: Joi.string().required(),
+    JWT_ALGORITHMES: Joi.string().required(),
     REDIS_HOST: Joi.string().required().description('Redis host'),
     REDIS_PORT: Joi.number().required().description('Redis port'),
     ALLOW_ORIGINS: Joi.string().empty('').default('*').description('Allowed origins for CORS'),
@@ -42,11 +37,10 @@ module.exports = {
     },
   },
   jwt: {
-    secret: envVars.JWT_SECRET,
-    accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
-    refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-    resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
-    verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+    jwksUri: envVars.JWT_JWKS_URI,
+    audience: envVars.JWT_AUDIENCE,
+    issuer: envVars.JWT_ISSUER,
+    algorithms: envVars.JWT_ALGORITHMES.split(' '),
   },
   redis: {
     host: envVars.REDIS_HOST,
