@@ -16,7 +16,7 @@ redisClient.on('ready', () => {
   console.log('Connect to redis');
 });
 
-const redisRefix = {
+const redisPrefix = {
   accessToken: 'accessToken/',
   username: 'username/',
   activeUser: 'activeUser/',
@@ -30,7 +30,7 @@ const redisRefix = {
 function setActiveUser(userId, client = null) {
   if (!client) client = redisClient;
 
-  const key = `${redisRefix.activeUser}${userId}`;
+  const key = `${redisPrefix.activeUser}${userId}`;
   console.log(`Active user ${userId}`);
   return redisClient.set(key, 'true', 'EX', 5 * 60);
 }
@@ -38,21 +38,22 @@ function setActiveUser(userId, client = null) {
  * @param {string} userId
  */
 function setDeacticeUser(userId) {
-  const key = `${redisRefix.activeUser}${userId}`;
+  const key = `${redisPrefix.activeUser}${userId}`;
   console.log(`Deactive user ${userId}`);
   return redisClient.get(key);
 }
+
 /**
  * @param {string} userId
  * @returns {Promise<'true'|null>}
  */
 function getActiveUser(userId) {
-  const key = `${redisRefix.activeUser}${userId}`;
+  const key = `${redisPrefix.activeUser}${userId}`;
   return redisClient.get(key);
 }
 module.exports = {
   redisClient,
-  redisRefix,
+  redisRefix: redisPrefix,
   setActiveUser,
   setDeacticeUser,
   getActiveUser,

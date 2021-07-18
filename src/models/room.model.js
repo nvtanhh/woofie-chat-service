@@ -1,26 +1,21 @@
 /* eslint-disable no-console */
 /* eslint-disable no-useless-catch */
+import { bool } from 'joi';
 import mongoose from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 
-export const CHAT_ROOM_TYPES = {
-  CONSUMER_TO_CONSUMER: 'consumer-to-consumer',
-  CONSUMER_TO_SUPPORT: 'consumer-to-support',
-};
-
-const chatRoomSchema = new mongoose.Schema(
+const roomSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => uuidv4().replace(/-/g, ''),
-    },
-    userIds: Array,
-    type: String,
-    chatInitiator: String,
+    name: String,
+    members: [
+      {
+        type: String,
+      },
+    ],
+    isGroup: { type: bool, default: false },
+    creator: String,
   },
   {
     timestamps: true,
-    collection: 'chatrooms',
   }
 );
 
@@ -28,9 +23,9 @@ const chatRoomSchema = new mongoose.Schema(
  * @param {String} userId - id of user
  * @return {Array} array of all chatroom that the user belongs to
  */
-chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
+roomSchema.statics.getChatRoomsByUserId = async function (userId) {
   try {
-    const rooms = await this.find({ userIds: { $all: [userId] } });
+    const rooms = await this.find({ members: { $all: [userId] } });
     return rooms;
   } catch (error) {
     throw error;
@@ -41,7 +36,7 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
  * @param {String} roomId - id of chatroom
  * @return {Object} chatroom
  */
-chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
+roomSchema.statics.getChatRoomByRoomId = async function (roomId) {
   try {
     const room = await this.findOne({ _id: roomId });
     return room;
@@ -51,18 +46,18 @@ chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
 };
 
 /**
- * @param {Array} userIds - array of strings of userIds
- * @param {String} chatInitiator - user who initiated the chat
- * @param {CHAT_ROOM_TYPES} type
+ * @param {Array} members - array of strings of members
+ * @param {String} creator - user who initiated the chat
+ * @param {bool} isGroup - is group chat or private chat default is false
  */
-chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiator) {
+roomSchema.statics.initiateChat = async function (members, creator, isGroup = false) {
   try {
     const availableRoom = await this.findOne({
-      userIds: {
-        $size: userIds.length,
-        $all: [...userIds],
+      members: {
+        $size: members.length,
+        $all: [...members],
       },
-      type,
+      isGroup,
     });
     if (availableRoom) {
       return {
@@ -73,7 +68,7 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
       };
     }
 
-    const newRoom = await this.create({ userIds, type, chatInitiator });
+    const newRoom = await this.create({ members, type: isGroup, creator });
     return {
       isNew: true,
       message: 'creating a new chatroom',
@@ -86,4 +81,4 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
   }
 };
 
-export default mongoose.model('ChatRoom', chatRoomSchema);
+export default mongoose.model('ChatRoom', roomSchema);
