@@ -2,13 +2,17 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
+const socketManager = require('./connectors/socket');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
+  /** Create HTTP server. */
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });
+  /** Create socket connection */
+  socketManager.init(server);
 });
 
 const exitHandler = () => {

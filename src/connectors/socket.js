@@ -1,10 +1,10 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
-import { allowOrgins } from '../config/config';
 
 const socketio = require('socket.io');
 const redis = require('socket.io-redis');
+const { allowOrgins } = require('../config/config');
 
 // const { Member } = require('@models');
 const { redisClient, setActiveUser, setDeacticeUser } = require('./redis');
@@ -168,5 +168,6 @@ class SocketManager {
     return this.sendGroupEvent(groupId, 'UpdatedGroup', ...data);
   }
 }
+const socketManager = new SocketManager();
 
-exports.socketManager = new SocketManager();
+module.exports = socketManager;
