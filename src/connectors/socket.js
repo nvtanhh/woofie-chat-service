@@ -8,7 +8,7 @@ const { allowOrgins } = require('../config/config');
 
 // const { Member } = require('@models');
 const { redisClient, setActiveUser, setDeacticeUser } = require('./redis');
-// const { getUser, parseJWT } = require('./auth');
+const { getUser } = require('./socket_auth');
 
 class SocketManager {
   constructor() {
@@ -35,39 +35,39 @@ class SocketManager {
       })
     );
 
-    // this._io.use(this._checkUser);
+    this._io.use(this._checkUser);
     this._io.on('connection', this._connection);
   }
 
-  // /**
-  //  * @param {socketio.Socket} socket
-  //  * @param {Function} next
-  //  */
-  // _checkUser = async (socket, next) => {
-  //   try {
-  //     if (!socket.handshake.query.access_token && !socket.handshake.query.jwt_token) {
-  //       return next(new Error('Unauthorization'));
-  //     }
+  /**
+   * @param {socketio.Socket} socket
+   * @param {Function} next
+   */
+  _checkUser = async (socket, next) => {
+    try {
+      if (!socket.handshake.query.token) {
+        return next(new Error('Unauthorization'));
+      }
 
-  //     try {
-  //       if (socket.handshake.query.access_token) {
-  //         const info = await getUser(socket.handshake.query.access_token);
-  //         this.users[socket.id] = info.uuid;
-  //       } else if (socket.handshake.query.jwt_token) {
-  //         const info = parseJWT(socket.handshake.query.jwt_token);
-  //         this.users[socket.id] = info.user_id;
-  //       } else throw new Error();
-  //       next();
-  //     } catch (_) {
-  //       socket.emit('NewConnection', { success: false });
-  //       next(new Error('Unauthorization'));
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     socket.emit('NewConnection', { success: false });
-  //     next(new Error('Internal Error'));
-  //   }
-  // };
+      try {
+        if (socket.handshake.query.token) {
+          const userUuid = await getUser(socket.handshake.query.token);
+          if (!userUuid) {
+            throw new Error();
+          }
+          this.users[socket.id] = userUuid;
+        } else throw new Error();
+        next();
+      } catch (_) {
+        socket.emit('NewConnection', { success: false });
+        next(new Error('Unauthorization'));
+      }
+    } catch (error) {
+      console.error(error);
+      socket.emit('NewConnection', { success: false });
+      next(new Error('Internal Error'));
+    }
+  };
 
   /**
    * @param {socketio.Socket} socket
@@ -80,12 +80,6 @@ class SocketManager {
 
     // event fired when the chat room is disconnected
     socket.on('disconnect', async () => {
-      // for (const room of client.rooms) {
-      //   if (typeof room === 'string') {
-      //     await client.leave(room);
-      //   }
-      // }
-
       await setDeacticeUser(this.users[socket.id]);
       delete this.users[socket.id];
     });

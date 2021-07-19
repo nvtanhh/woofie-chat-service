@@ -3,7 +3,7 @@
 import { bool } from 'joi';
 import mongoose from 'mongoose';
 
-const roomSchema = new mongoose.Schema(
+const chatRoomSchema = new mongoose.Schema(
   {
     name: String,
     members: [
@@ -23,7 +23,7 @@ const roomSchema = new mongoose.Schema(
  * @param {String} userId - id of user
  * @return {Array} array of all chatroom that the user belongs to
  */
-roomSchema.statics.getChatRoomsByUserId = async function (userId) {
+chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
   try {
     const rooms = await this.find({ members: { $all: [userId] } });
     return rooms;
@@ -36,7 +36,7 @@ roomSchema.statics.getChatRoomsByUserId = async function (userId) {
  * @param {String} roomId - id of chatroom
  * @return {Object} chatroom
  */
-roomSchema.statics.getChatRoomByRoomId = async function (roomId) {
+chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
   try {
     const room = await this.findOne({ _id: roomId });
     return room;
@@ -50,7 +50,7 @@ roomSchema.statics.getChatRoomByRoomId = async function (roomId) {
  * @param {String} creator - user who initiated the chat
  * @param {bool} isGroup - is group chat or private chat default is false
  */
-roomSchema.statics.initiateChat = async function (members, creator, isGroup = false) {
+chatRoomSchema.statics.initiateChat = async function (members, creator, isGroup = false) {
   try {
     const availableRoom = await this.findOne({
       members: {
@@ -59,6 +59,7 @@ roomSchema.statics.initiateChat = async function (members, creator, isGroup = fa
       },
       isGroup,
     });
+
     if (availableRoom) {
       return {
         isNew: false,
@@ -68,17 +69,19 @@ roomSchema.statics.initiateChat = async function (members, creator, isGroup = fa
       };
     }
 
-    const newRoom = await this.create({ members, type: isGroup, creator });
-    return {
-      isNew: true,
-      message: 'creating a new chatroom',
-      chatRoomId: newRoom._doc._id,
-      type: newRoom._doc.type,
-    };
+    if (!isGroup && members.length === 1) {
+      const newRoom = await this.create({ name: `${creator}_${members.first}`, members, isGroup, creator });
+      return {
+        isNew: true,
+        message: 'creating a new chatroom',
+        chatRoomId: newRoom._id,
+        type: newRoom.type,
+      };
+    }
   } catch (error) {
     console.log('error on start chat method', error);
     throw error;
   }
 };
 
-export default mongoose.model('ChatRoom', roomSchema);
+export default mongoose.model('ChatRoom', chatRoomSchema);

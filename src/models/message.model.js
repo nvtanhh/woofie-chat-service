@@ -36,13 +36,13 @@ const messageSchema = new mongoose.Schema(
 );
 
 /**
- * This method will create a post in chat
+ * This method will create a new message
  *
  * @param {String} roomId - id of chat room
  * @param {Object} message - message you want to post in the chat room
  * @param {String} sender - user who is posting the message
  */
-messageSchema.statics.createPostInChatRoom = async function (chatRoomId, message, sender) {
+messageSchema.statics.sendMessage = async function (chatRoomId, message, sender) {
   try {
     const post = await this.create({
       chatRoomId,

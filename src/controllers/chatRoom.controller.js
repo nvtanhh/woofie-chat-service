@@ -1,6 +1,6 @@
 import makeValidation from '@withvoid/make-validation';
-import ChatRoomModel, { CHAT_ROOM_TYPES } from '../models/chatRoom.model';
-import ChatMessageModel from '../models/chatMessage.model';
+import ChatRoomModel from '../models/chatRoom.model';
+import MessageModel from '../models/message.model';
 import UserModel from '../models/user.model';
 
 export default {
@@ -9,11 +9,11 @@ export default {
       const validation = makeValidation((types) => ({
         payload: req.body,
         checks: {
-          userIds: {
+          members: {
             type: types.array,
             options: { unique: true, empty: false, stringOnly: true },
           },
-          type: { type: types.enum, options: { enum: CHAT_ROOM_TYPES } },
+          type: { type: types.boolean },
         },
       }));
       if (!validation.success) return res.status(400).json({ ...validation });
@@ -42,7 +42,7 @@ export default {
         messageText: req.body.messageText,
       };
       const currentLoggedUser = req.userId;
-      const post = await ChatMessageModel.createPostInChatRoom(roomId, messagePayload, currentLoggedUser);
+      const post = await MessageModel.sendMessage(roomId, messagePayload, currentLoggedUser);
       global.io.sockets.in(roomId).emit('new message', { message: post });
       return res.status(200).json({ success: true, post });
     } catch (error) {
@@ -58,7 +58,7 @@ export default {
       };
       const rooms = await ChatRoomModel.getChatRoomsByUserId(currentLoggedUser);
       const roomIds = rooms.map((room) => room._id);
-      const recentConversation = await ChatMessageModel.getRecentConversation(roomIds, options, currentLoggedUser);
+      const recentConversation = await MessageModel.getRecentConversation(roomIds, options, currentLoggedUser);
       return res.status(200).json({ success: true, conversation: recentConversation });
     } catch (error) {
       return res.status(500).json({ success: false, error });
@@ -79,7 +79,7 @@ export default {
         page: parseInt(req.query.page, 10) || 0,
         limit: parseInt(req.query.limit, 10) || 10,
       };
-      const conversation = await ChatMessageModel.getConversationByRoomId(roomId, options);
+      const conversation = await MessageModel.getConversationByRoomId(roomId, options);
       return res.status(200).json({
         success: true,
         conversation,
@@ -101,7 +101,7 @@ export default {
       }
 
       const currentLoggedUser = req.userId;
-      const result = await ChatMessageModel.markMessageRead(roomId, currentLoggedUser);
+      const result = await MessageModel.markMessageRead(roomId, currentLoggedUser);
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, error });
