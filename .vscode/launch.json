@@ -10,9 +10,6 @@
       "name": "Launch Program",
       "runtimeExecutable": "yarn",
       "skipFiles": ["<node_internals>/**"],
-      "env": {
-        "NODE_ENV": "development"
-      },
       "runtimeArgs": ["dev"]
     }
   ]

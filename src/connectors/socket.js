@@ -59,12 +59,12 @@ class SocketManager {
         } else throw new Error();
         next();
       } catch (_) {
-        socket.emit('NewConnection', { success: false });
+        socket.emit('authenticated', { success: false });
         next(new Error('Unauthorization'));
       }
     } catch (error) {
       console.error(error);
-      socket.emit('NewConnection', { success: false });
+      socket.emit('authenticated', { success: false });
       next(new Error('Internal Error'));
     }
   };
@@ -84,31 +84,7 @@ class SocketManager {
       delete this.users[socket.id];
     });
 
-    socket.on('join-group-chat', async (id) => {
-      // const m = await Member.findOne({
-      //   where: {
-      //     member_id: this.users[client.id],
-      //     group_id: id,
-      //   },
-      // });
-      // if (m) {
-      //   console.log(`WS: user ${this.users[client.id]} join group ${id}`);
-      //   await client.join(this._getGroup(id));
-      //   client.emit('join-group-chat', { success: true });
-      // } else client.emit('join-group-chat', { success: false });
-    });
-
-    socket.on('leave-group-chat', async (id) => {
-      const room = this._getGroup(id);
-      if (socket.rooms.has(room)) {
-        console.log(`WS: user ${this.users[socket.id]} leave group ${id}`);
-        await socket.leave(room);
-
-        socket.emit('leave-group-chat', { success: true });
-      } else socket.emit('leave-group-chat', { success: false });
-    });
-
-    socket.emit('NewConnection', { success: true });
+    socket.emit('authenticated', { success: true });
   };
 
   /**

@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable no-useless-catch */
-import { bool } from 'joi';
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const chatRoomSchema = new mongoose.Schema(
   {
@@ -11,7 +9,7 @@ const chatRoomSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    isGroup: { type: bool, default: false },
+    isGroup: { type: Boolean, default: false },
     creator: String,
   },
   {
@@ -21,15 +19,14 @@ const chatRoomSchema = new mongoose.Schema(
 
 /**
  * @param {String} userId - id of user
+ * @param {{ page, limit }} options - pagination options
  * @return {Array} array of all chatroom that the user belongs to
  */
-chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
-  try {
-    const rooms = await this.find({ members: { $all: [userId] } });
-    return rooms;
-  } catch (error) {
-    throw error;
-  }
+chatRoomSchema.statics.getChatRoomsByUserId = async function (userId, options) {
+  const rooms = await this.find({ members: { $all: [userId] } })
+    .skip(options.page * options.limit)
+    .limit(options.limit);
+  return rooms;
 };
 
 /**
@@ -37,12 +34,8 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
  * @return {Object} chatroom
  */
 chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
-  try {
-    const room = await this.findOne({ _id: roomId });
-    return room;
-  } catch (error) {
-    throw error;
-  }
+  const room = await this.findOne({ _id: roomId });
+  return room;
 };
 
 /**
@@ -51,37 +44,34 @@ chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
  * @param {bool} isGroup - is group chat or private chat default is false
  */
 chatRoomSchema.statics.initiateChat = async function (members, creator, isGroup = false) {
-  try {
-    const availableRoom = await this.findOne({
-      members: {
-        $size: members.length,
-        $all: [...members],
-      },
-      isGroup,
-    });
+  const availableRoom = await this.findOne({
+    members: {
+      $size: members.length,
+      $all: [...members],
+    },
+    isGroup,
+  });
 
-    if (availableRoom) {
-      return {
-        isNew: false,
-        message: 'retrieving an old chat room',
-        chatRoomId: availableRoom._doc._id,
-        type: availableRoom._doc.type,
-      };
-    }
+  if (availableRoom) {
+    return {
+      isNew: false,
+      message: 'retrieving an old chat room',
+      chatRoomId: availableRoom._id,
+      isGroup: availableRoom.isGroup,
+    };
+  }
 
-    if (!isGroup && members.length === 1) {
-      const newRoom = await this.create({ name: `${creator}_${members.first}`, members, isGroup, creator });
-      return {
-        isNew: true,
-        message: 'creating a new chatroom',
-        chatRoomId: newRoom._id,
-        type: newRoom.type,
-      };
-    }
-  } catch (error) {
-    console.log('error on start chat method', error);
-    throw error;
+  if (!isGroup && members.length === 1) {
+    const newRoom = await this.create({ name: `${creator}_${members.first}`, members, isGroup, creator });
+    return {
+      isNew: true,
+      message: 'creating a new chatroom',
+      chatRoomId: newRoom._id,
+      isGroup: newRoom.isGroup,
+    };
   }
 };
 
-export default mongoose.model('ChatRoom', chatRoomSchema);
+const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
+
+module.exports = ChatRoom;
