@@ -1,5 +1,5 @@
 const makeValidation = require('@withvoid/make-validation');
-const ChatRoomModel = require('../models/chatRoom.model');
+const ChatRoomModel = require('../models/room.model');
 const MessageModel = require('../models/message.model');
 const socketManager = require('../connectors/socket');
 
@@ -14,15 +14,15 @@ const initiate = async (req, res) => {
           type: types.array,
           options: { unique: true, empty: false, stringOnly: true },
         },
-        type: { type: types.boolean },
+        isGroup: { type: types.boolean },
       },
     }));
     if (!validation.success) return res.status(400).json({ ...validation });
 
-    const { userIds, type } = req.body;
-    const { userId: chatInitiator } = req;
-    const allUserIds = [...userIds, chatInitiator];
-    const chatRoom = await ChatRoomModel.initiateChat(allUserIds, type, chatInitiator);
+    const { members, isGroup } = req.body;
+    const creatorId = req.userId;
+    members.push(creatorId);
+    const chatRoom = await ChatRoomModel.initiateChat(members, creatorId, isGroup);
     return res.status(200).json({ success: true, chatRoom });
   } catch (error) {
     return res.status(500).json({ success: false, error });

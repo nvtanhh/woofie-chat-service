@@ -1,13 +1,18 @@
 /* eslint-disable no-console */
 const express = require('express');
-const chatRoute = require('./chat.route');
+const messageRoute = require('./message.route');
+const roomRoute = require('./room.route');
 
 const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: '/chat',
-    route: chatRoute,
+    path: '/room',
+    route: roomRoute,
+  },
+  {
+    path: '/message',
+    route: messageRoute,
   },
 ];
 

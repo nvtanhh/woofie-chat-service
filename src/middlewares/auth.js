@@ -6,7 +6,7 @@ const verifyCallback = (req, resolve, reject) => async (err, userUuid, info) => 
   if (err || info || !userUuid) {
     return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
   }
-  req.userUuid = userUuid;
+  req.userId = userUuid;
   resolve();
 };
 
