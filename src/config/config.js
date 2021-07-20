@@ -46,5 +46,5 @@ module.exports = {
     host: envVars.REDIS_HOST,
     port: envVars.REDIS_PORT,
   },
-  allowOrgins: envVars.ALLOW_ORIGINS ?? '*',
+  allowOrigins: envVars.ALLOW_ORIGINS ?? '*',
 };

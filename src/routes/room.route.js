@@ -8,8 +8,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .use(auth())
-  .get(validate(roomValidation.getRecentChatRooms), roomController.getRecentChatRooms)
-  .post(validate(roomValidation.initiate), roomController.initiate);
+  .get(auth, validate(roomValidation.getRecentChatRooms), roomController.getRecentChatRooms)
+  .post(auth, validate(roomValidation.initiate), roomController.initiateChatRoom);
 
 module.exports = router;

@@ -1,15 +1,14 @@
 const express = require('express');
-const roomController = require('../controllers/room.controller');
+const messageController = require('../controllers/message.controller');
 const auth = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
-const roomValidation = require('../validations/room.validation');
+const messageValidation = require('../validations/message.validation');
 
 const router = express.Router();
 
 router
-  .route('/')
-  .use(auth())
-  .get(validate(roomValidation.getRecentChatRooms), roomController.getRecentChatRooms)
-  .post(validate(roomValidation.initiate), roomController.initiate);
+  .route('/:roomId')
+  .get(auth, validate(messageValidation.getMessageByRoomId), messageController.getConversationByRoomId)
+  .post(auth, validate(messageValidation.createNewMessage), messageController.createNewMessage);
 
 module.exports = router;

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 const Joi = require('joi');
 
 const getRecentChatRooms = {

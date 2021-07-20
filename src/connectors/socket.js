@@ -4,10 +4,10 @@
 
 const socketio = require('socket.io');
 const redis = require('socket.io-redis');
-const { allowOrgins } = require('../config/config');
+const { allowOrigins } = require('../config/config');
 
 // const { Member } = require('@models');
-const { redisClient, setActiveUser, setDeacticeUser } = require('./redis');
+const { redisClient, setActiveUser, setDeacticeUser: setDeactivateUser } = require('./redis');
 const { getUser } = require('./socket_auth');
 
 class SocketManager {
@@ -22,7 +22,7 @@ class SocketManager {
       allowEIO3: true,
       destroyUpgrade: false,
       cors: {
-        origin: allowOrgins,
+        origin: allowOrigins,
         methods: ['GET', 'POST'],
       },
     });
@@ -80,7 +80,7 @@ class SocketManager {
 
     // event fired when the chat room is disconnected
     socket.on('disconnect', async () => {
-      await setDeacticeUser(this.users[socket.id]);
+      await setDeactivateUser(this.users[socket.id]);
       delete this.users[socket.id];
     });
 

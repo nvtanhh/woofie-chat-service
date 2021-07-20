@@ -17,25 +17,25 @@ const getRecentChatRooms = async (req, res) => {
       rooms[room].messages = messages;
     });
 
-    return res.status(200).json({ success: true, conversation: rooms });
+    return res.status(200).json({ rooms });
   } catch (error) {
-    return res.status(500).json({ success: false, error });
+    return res.status(500).json({ error });
   }
 };
 
-const initiate = async (req, res) => {
+const initiateChatRoom = async (req, res) => {
   try {
     const { members, isGroup } = req.body;
     const creatorId = req.userId;
     members.push(creatorId);
     const chatRoom = await roomService.initiateChatRoom(members, creatorId, isGroup);
-    return res.status(200).json({ success: true, chatRoom });
+    return res.status(200).json({ chatRoom });
   } catch (error) {
-    return res.status(500).json({ success: false, error });
+    return res.status(500).json({ error });
   }
 };
 
 module.exports = {
   getRecentChatRooms,
-  initiate,
+  initiateChatRoom,
 };
