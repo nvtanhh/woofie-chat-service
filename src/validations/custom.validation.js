@@ -15,7 +15,14 @@ const password = (value, helpers) => {
   return value;
 };
 
+const isMessageType = (value, helpers) => {
+  const types = ['T', 'I'];
+  if (types.includes(value)) return value;
+  return helpers.message(`Valid type is ${types}`);
+};
+
 module.exports = {
   objectId,
   password,
+  isMessageType,
 };

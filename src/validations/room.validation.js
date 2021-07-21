@@ -6,12 +6,13 @@ const getRecentChatRooms = {
     page: Joi.number().integer().default(0),
   }),
 };
+
 const initiate = {
   body: Joi.object().keys({
     members: Joi.array()
       .items(Joi.string())
       .unique((a, b) => a === b)
-      .default([]),
+      .required(),
     isGroup: Joi.bool().default(false),
   }),
 };

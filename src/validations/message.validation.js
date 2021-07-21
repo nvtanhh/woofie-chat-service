@@ -1,6 +1,5 @@
 const Joi = require('joi');
-const MESSAGE_TYPES = require('../utils/constants');
-const { objectId } = require('./custom.validation');
+const { objectId, isMessageType } = require('./custom.validation');
 
 const getMessageByRoomId = {
   params: Joi.object().keys({
@@ -18,7 +17,7 @@ const createNewMessage = {
   }),
   body: Joi.object().keys({
     content: Joi.string().required(),
-    type: Joi.string().valid(MESSAGE_TYPES).default('text'),
+    type: Joi.string().default('T').custom(isMessageType),
   }),
 };
 

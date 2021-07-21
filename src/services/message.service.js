@@ -5,11 +5,12 @@ const Message = require('../models/message.model');
  * @param {{ page, limit }} options - pagination options
  * @return {Array} array of message of the roomId
  */
-const getMessagesByRoomId = async (roomId, options) => {
-  return Message.find({ roomId })
-    .sort('-createdAt', -1)
+const getMessagesByRoomId = async (chatRoomId, options) => {
+  return Message.find({ chatRoomId })
+    .sort('-createdAt')
     .skip(options.page * options.limit)
-    .limit(options.limit);
+    .limit(options.limit)
+    .select('-_id -__v -updatedAt -chatRoomId -readByRecipients');
 };
 
 /**
@@ -23,11 +24,32 @@ const getMessagesByRoomId = async (roomId, options) => {
 const createNewMessage = async function (chatRoomId, message, senderId) {
   return Message.create({
     chatRoomId,
-    message: message.content,
+    content: message.content,
     type: message.type,
     sender: senderId,
     readByRecipients: { reader: senderId },
   });
 };
 
-module.exports = { getMessagesByRoomId, createNewMessage };
+/**
+ * @param {String} chatRoomId - chat room id
+ * @param {String} currentUserOnlineId - user id
+ */
+const markMessageRead = async function (chatRoomId, currentUserOnlineId) {
+  return this.updateMany(
+    {
+      chatRoomId,
+      'readByRecipients.reader': { $ne: currentUserOnlineId },
+    },
+    {
+      $addToSet: {
+        readByRecipients: { reader: currentUserOnlineId },
+      },
+    },
+    {
+      multi: true,
+    }
+  );
+};
+
+module.exports = { getMessagesByRoomId, createNewMessage, markMessageRead };

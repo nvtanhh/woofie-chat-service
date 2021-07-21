@@ -37,7 +37,7 @@ const createNewMessage = async (req, res) => {
     const message = pick(req.body, ['content', 'type']);
     const newMessage = await messageService.createNewMessage(roomId, message, loggedInUserId);
     if (newMessage) {
-      socketManager.sendUserEvent(loggedInUserId, 'new_message', newMessage.toJSON());
+      socketManager.sendUserEvent(loggedInUserId, 'new-message', newMessage.toJSON());
     }
     return res.status(201).json({ newMessage });
   } catch (error) {

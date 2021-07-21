@@ -8,7 +8,8 @@ const RoomModel = require('../models/room.model');
 const getRecentChatRoomsByUserId = async (userId, options) => {
   return RoomModel.find({ members: { $all: [userId] } })
     .skip(options.page * options.limit)
-    .limit(options.limit);
+    .limit(options.limit)
+    .lean();
 };
 
 /**
@@ -29,18 +30,20 @@ const initiateChatRoom = async function (members, creatorId, isGroup = false) {
   if (availableRoom) {
     return {
       isNew: false,
-      message: 'retrieving an old chat room',
+      message: 'retrieve an old chat room',
       chatRoomId: availableRoom._id,
+      chatRoomName: availableRoom.name,
       isGroup: availableRoom.isGroup,
     };
   }
-
-  if (!isGroup && members.length === 1) {
-    const newRoom = await RoomModel.create({ name: `${creatorId}_${members.first}`, members, isGroup, creator: creatorId });
+  // is private chat
+  if (!isGroup && members.length === 2) {
+    const newRoom = await RoomModel.create({ name: `${creatorId}_${members[0]}`, members, isGroup, creator: creatorId });
     return {
       isNew: true,
       message: 'create a new chatroom',
       chatRoomId: newRoom._id,
+      chatRoomName: newRoom.name,
       isGroup: newRoom.isGroup,
     };
   }
@@ -51,7 +54,7 @@ const initiateChatRoom = async function (members, creatorId, isGroup = false) {
  * @return {Object} chatroom
  */
 const getChatRoomByRoomId = async function (roomId) {
-  const room = await RoomModel.findOne({ _id: roomId });
+  const room = await RoomModel.findById(roomId);
   return room;
 };
 
