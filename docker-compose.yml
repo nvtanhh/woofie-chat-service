@@ -5,28 +5,43 @@ services:
     build: .
     image: node-app
     environment:
-      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
+      - MONGODB_URL=mongodb://mongodb:27017/woofie-chat
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
-      - '3000:3000'
+      - 3000:3000
     depends_on:
       - mongodb
+      - redis
     volumes:
-      - .:/usr/src/node-app
+      - ./runzone/node-app/server:/code
+      # - ./runzone/node-app/server:/usr/src/node-app
     networks:
-      - node-network
+      - woofie-chat-network
 
   mongodb:
     image: mongo:4.2.1-bionic
     ports:
-      - '27017:27017'
+      - 27017:27017
     volumes:
-      - dbdata:/data/db
+      - ./runzone/storage/mongo/data:/data/db
     networks:
-      - node-network
+      - woofie-chat-network
+
+  redis:
+    container_name: woofie-redis
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./runzone/storage/redis/data:/data
+    networks:
+      - woofie-chat-network
 
 volumes:
   dbdata:
 
 networks:
-  node-network:
+  woofie-chat-network:
     driver: bridge
