@@ -33,6 +33,14 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
+messageSchema.method('toJSON', function () {
+  const obj = this.toObject();
+  obj.id = obj._id;
+  delete obj._id;
+  delete obj.__v;
+  return obj;
+});
+
 const Message = mongoose.model('Message', messageSchema);
 
 module.exports = Message;

@@ -20,7 +20,8 @@ const getConversationByRoomId = async (req, res) => {
     }
     const options = pick(req.query, ['limit', 'page']);
     const messages = await messageService.getMessagesByRoomId(roomId, options);
-    return res.status(200).json({ messages });
+    const messageViewModels = messages.map((message) => message.toJSON());
+    return res.status(200).json({ messages: messageViewModels });
   } catch (error) {
     return res.status(500).json({ error });
   }
@@ -36,8 +37,9 @@ const createNewMessage = async (req, res) => {
     }
     const message = pick(req.body, ['content', 'type']);
     const newMessage = await messageService.createNewMessage(roomId, message, loggedInUserId);
+    const newMessageJson = newMessage.toJSON();
     if (newMessage) {
-      socketManager.sendUserEvent(loggedInUserId, 'new-message', newMessage.toJSON());
+      socketManager.sendUserEvent(loggedInUserId, 'new-message', newMessageJson);
     }
     return res.status(201).json({ newMessage });
   } catch (error) {

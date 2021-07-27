@@ -15,6 +15,13 @@ const roomSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+roomSchema.method('toJSON', function () {
+  const obj = this.toObject();
+  obj.id = obj._id;
+  delete obj._id;
+  delete obj.__v;
+  return obj;
+});
 
 const Room = mongoose.model('Room', roomSchema);
 

@@ -7,7 +7,7 @@ const redis = require('socket.io-redis');
 const { allowOrigins } = require('../config/config');
 
 // const { Member } = require('@models');
-const { redisClient, setActiveUser, setDeacticeUser: setDeactivateUser } = require('./redis');
+const { redisClient, setActiveUser, setInactiveUser } = require('./redis');
 const { getUser } = require('./socket_auth');
 
 class SocketManager {
@@ -21,10 +21,10 @@ class SocketManager {
     this._io = socketio(server, {
       allowEIO3: true,
       destroyUpgrade: false,
-      cors: {
-        origin: allowOrigins,
-        methods: ['GET', 'POST'],
-      },
+      // cors: {
+      //   origin: allowOrigins,
+      //   methods: ['GET', 'POST'],
+      // },
     });
 
     const subClient = redisClient.duplicate();
@@ -36,7 +36,7 @@ class SocketManager {
     );
 
     this._io.use(this._checkUser);
-    this._io.on('connection', this._connection);
+    this._io.on('connection', this._onConnection);
   }
 
   /**
@@ -72,7 +72,7 @@ class SocketManager {
   /**
    * @param {socketio.Socket} socket
    */
-  _connection = async (socket) => {
+  _onConnection = async (socket) => {
     // join to room of this user to support multi devices
     await socket.join(this._getUserRoom(this.users[socket.id]));
 
@@ -80,8 +80,12 @@ class SocketManager {
 
     // event fired when the chat room is disconnected
     socket.on('disconnect', async () => {
-      await setDeactivateUser(this.users[socket.id]);
+      await setInactiveUser(this.users[socket.id]);
       delete this.users[socket.id];
+    });
+
+    socket.on('typing', (data) => {
+      this.sendUserEvent(data.partnerId, 'is-typing');
     });
 
     socket.emit('authenticated', { success: true });
@@ -92,7 +96,7 @@ class SocketManager {
    * @returns {string}
    */
   _getUserRoom(id) {
-    return `/user-chat/${id}`;
+    return `/private-chat/${id}`;
   }
 
   /**
@@ -110,34 +114,35 @@ class SocketManager {
    * @returns
    */
   sendUserEvent(userId, eventName, ...data) {
-    return this._io.to(this._getUserRoom(userId)).emit(eventName, ...data);
+    const receiver = this._getUserRoom(userId);
+    if (receiver in this.users) return this._io.to(this._getUserRoom(userId)).emit(eventName, ...data);
   }
 
-  /**
-   * @param {number} groupId
-   * @param {string} eventName
-   * @param  {...any} data
-   * @returns
-   */
-  sendGroupEvent(groupId, eventName, ...data) {
-    return this._io.to(this._getGroup(groupId)).emit(eventName, ...data);
-  }
+  // /**
+  //  * @param {number} groupId
+  //  * @param {string} eventName
+  //  * @param  {...any} data
+  //  * @returns
+  //  */
+  // sendGroupEvent(groupId, eventName, ...data) {
+  //   return this._io.to(this._getGroup(groupId)).emit(eventName, ...data);
+  // }
 
   sendNewMessage(groupId, ...data) {
-    return this.sendGroupEvent(groupId, 'NewMessage', ...data);
+    return this.sendGroupEvent(groupId, 'new-message', ...data);
   }
 
-  sendNewMember(groupId, ...data) {
-    return this.sendGroupEvent(groupId, 'NewMember', ...data);
-  }
+  // sendNewMember(groupId, ...data) {
+  //   return this.sendGroupEvent(groupId, 'NewMember', ...data);
+  // }
 
-  sendViewedMessage(groupId, ...data) {
-    return this.sendGroupEvent(groupId, 'ViewedMessage', ...data);
-  }
+  // sendViewedMessage(groupId, ...data) {
+  //   return this.sendGroupEvent(groupId, 'ViewedMessage', ...data);
+  // }
 
-  sendUpdatedGroup(groupId, ...data) {
-    return this.sendGroupEvent(groupId, 'UpdatedGroup', ...data);
-  }
+  // sendUpdatedGroup(groupId, ...data) {
+  //   return this.sendGroupEvent(groupId, 'UpdatedGroup', ...data);
+  // }
 }
 const socketManager = new SocketManager();
 

@@ -37,9 +37,9 @@ function setActiveUser(userId, client = null) {
 /**
  * @param {string} userId
  */
-function setDeacticeUser(userId) {
+function setInactiveUser(userId) {
   const key = `${redisPrefix.activeUser}${userId}`;
-  console.log(`Deactive user ${userId}`);
+  console.log(`Inactive user ${userId}`);
   return redisClient.get(key);
 }
 
@@ -53,8 +53,7 @@ function getActiveUser(userId) {
 }
 module.exports = {
   redisClient,
-  redisRefix: redisPrefix,
   setActiveUser,
-  setDeacticeUser,
+  setInactiveUser,
   getActiveUser,
 };

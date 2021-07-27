@@ -16,16 +16,17 @@ const getRecentChatRooms = async (req, res) => {
   try {
     const loggedUserId = req.userId;
     const options = pick(req.query, ['limit', 'page']);
-    const rooms = await roomService.getRecentChatRoomsByUserId(loggedUserId, options);
+    const roomsRaw = await roomService.getRecentChatRoomsByUserId(loggedUserId, options);
+    const rooms = roomsRaw.map((room) => room.toJSON());
     const firstTimeGetMessageOptions = {
       page: 0,
       limit: FirstTimeMessagesCount,
     };
     await Promise.all(
       rooms.map(async (room, index) => {
-        const messages = await messageService.getMessagesByRoomId(room._id, firstTimeGetMessageOptions);
-        // const messageViewModels = messages.map((message) => _toMessageViewModel(message, loggedUserId));
-        rooms[index].messages = messages;
+        const messages = await messageService.getMessagesByRoomId(room.id, firstTimeGetMessageOptions);
+        const messageViewModels = messages.map((message) => message.toJSON());
+        rooms[index].messages = messageViewModels;
       })
     );
 
