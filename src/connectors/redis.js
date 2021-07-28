@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-/* eslint-disable no-console */
 const Redis = require('ioredis');
 const config = require('../config/config');
+const logger = require('../config/logger');
 
 const redisClient = new Redis({
   host: config.redis.host,
@@ -9,11 +9,11 @@ const redisClient = new Redis({
 });
 
 redisClient.on('error', function (error) {
-  console.error(error);
+  logger.error(error);
 });
 
 redisClient.on('ready', () => {
-  console.log('Connect to redis');
+  logger.info('Connect to redis');
 });
 
 const redisPrefix = {
@@ -31,7 +31,7 @@ function setActiveUser(userId, client = null) {
   if (!client) client = redisClient;
 
   const key = `${redisPrefix.activeUser}${userId}`;
-  console.log(`Active user ${userId}`);
+  logger.info(`Active user ${userId}`);
   return redisClient.set(key, 'true', 'EX', 5 * 60);
 }
 /**
@@ -39,7 +39,7 @@ function setActiveUser(userId, client = null) {
  */
 function setInactiveUser(userId) {
   const key = `${redisPrefix.activeUser}${userId}`;
-  console.log(`Inactive user ${userId}`);
+  logger.info(`Inactive user ${userId}`);
   return redisClient.get(key);
 }
 

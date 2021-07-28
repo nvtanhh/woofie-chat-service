@@ -7,7 +7,7 @@ const getMessageByRoomId = {
   }),
   query: Joi.object().keys({
     limit: Joi.number().integer().default(10),
-    page: Joi.number().integer().default(0),
+    skip: Joi.number().integer().default(0),
   }),
 };
 
@@ -18,6 +18,7 @@ const createNewMessage = {
   body: Joi.object().keys({
     content: Joi.string().required(),
     type: Joi.string().default('T').custom(isMessageType),
+    description: Joi.string(),
   }),
 };
 

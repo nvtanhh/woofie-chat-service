@@ -18,7 +18,7 @@ const getConversationByRoomId = async (req, res) => {
         message: 'No room exists for this id',
       });
     }
-    const options = pick(req.query, ['limit', 'page']);
+    const options = pick(req.query, ['limit', 'skip']);
     const messages = await messageService.getMessagesByRoomId(roomId, options);
     const messageViewModels = messages.map((message) => message.toJSON());
     return res.status(200).json({ messages: messageViewModels });
@@ -35,13 +35,13 @@ const createNewMessage = async (req, res) => {
     if (!chatRoom) {
       return res.status(400).json({ message: 'Initiate chat room failed!' });
     }
-    const message = pick(req.body, ['content', 'type']);
+    const message = pick(req.body, ['content', 'type', 'description']);
     const newMessage = await messageService.createNewMessage(roomId, message, loggedInUserId);
     const newMessageJson = newMessage.toJSON();
     if (newMessage) {
       socketManager.sendUserEvent(loggedInUserId, 'new-message', newMessageJson);
     }
-    return res.status(201).json({ newMessage });
+    return res.status(201).json({ new_message: newMessage });
   } catch (error) {
     return res.status(500).json({ error });
   }

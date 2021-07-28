@@ -3,7 +3,7 @@ const Joi = require('joi');
 const getRecentChatRooms = {
   query: Joi.object().keys({
     limit: Joi.number().integer().default(10),
-    page: Joi.number().integer().default(0),
+    skip: Joi.number().integer().default(0),
   }),
 };
 

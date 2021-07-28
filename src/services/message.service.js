@@ -8,7 +8,7 @@ const Message = require('../models/message.model');
 const getMessagesByRoomId = async (chatRoomId, options) => {
   return Message.find({ chatRoomId })
     .sort('-createdAt')
-    .skip(options.page * options.limit)
+    .skip(options.skip)
     .limit(options.limit)
     .select('-__v -updatedAt -chatRoomId -readByRecipients');
 };
@@ -27,29 +27,30 @@ const createNewMessage = async function (chatRoomId, message, senderId) {
     content: message.content,
     type: message.type,
     sender: senderId,
-    readByRecipients: { reader: senderId },
+    description: message.description,
+    // readByRecipients: { reader: senderId },
   });
 };
 
-/**
- * @param {String} chatRoomId - chat room id
- * @param {String} currentUserOnlineId - user id
- */
-const markMessageRead = async function (chatRoomId, currentUserOnlineId) {
-  return this.updateMany(
-    {
-      chatRoomId,
-      'readByRecipients.reader': { $ne: currentUserOnlineId },
-    },
-    {
-      $addToSet: {
-        readByRecipients: { reader: currentUserOnlineId },
-      },
-    },
-    {
-      multi: true,
-    }
-  );
-};
+// /**
+//  * @param {String} chatRoomId - chat room id
+//  * @param {String} currentUserOnlineId - user id
+//  */
+// const markMessageRead = async function (chatRoomId, currentUserOnlineId) {
+//   return this.updateMany(
+//     {
+//       chatRoomId,
+//       'readByRecipients.reader': { $ne: currentUserOnlineId },
+//     },
+//     {
+//       $addToSet: {
+//         readByRecipients: { reader: currentUserOnlineId },
+//       },
+//     },
+//     {
+//       multi: true,
+//     }
+//   );
+// };
 
-module.exports = { getMessagesByRoomId, createNewMessage, markMessageRead };
+module.exports = { getMessagesByRoomId, createNewMessage };

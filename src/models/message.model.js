@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
 
-const readByRecipientSchema = new mongoose.Schema(
-  {
-    reader: String,
-    readAt: {
-      type: Date,
-      default: Date.now(),
-    },
-  },
-  {
-    timestamps: false,
-  }
-);
+// const readByRecipientSchema = new mongoose.Schema(
+//   {
+//     reader: String,
+//     readAt: {
+//       type: Date,
+//       default: Date.now(),
+//     },
+//   },
+//   {
+//     timestamps: false,
+//   }
+// );
+// readByRecipients: [readByRecipientSchema],
 
 const messageSchema = new mongoose.Schema(
   {
@@ -20,13 +21,13 @@ const messageSchema = new mongoose.Schema(
       ref: 'Room',
     },
     content: mongoose.Schema.Types.Mixed,
+    description: mongoose.Schema.Types.String,
     type: {
       type: String,
-      enum: ['T', 'I'],
+      enum: ['T', 'I', 'V'],
       default: 'T',
     },
     sender: String,
-    readByRecipients: [readByRecipientSchema],
   },
   {
     timestamps: true,

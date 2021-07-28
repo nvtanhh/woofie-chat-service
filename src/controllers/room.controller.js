@@ -15,7 +15,7 @@ const FirstTimeMessagesCount = 10;
 const getRecentChatRooms = async (req, res) => {
   try {
     const loggedUserId = req.userId;
-    const options = pick(req.query, ['limit', 'page']);
+    const options = pick(req.query, ['limit', 'skip']);
     const roomsRaw = await roomService.getRecentChatRoomsByUserId(loggedUserId, options);
     const rooms = roomsRaw.map((room) => room.toJSON());
     const firstTimeGetMessageOptions = {
