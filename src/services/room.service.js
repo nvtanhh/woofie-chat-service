@@ -52,9 +52,8 @@ const initiateChatRoom = async function (members, creatorId, isGroup = false) {
  * @param {String} roomId - id of chatroom
  * @return {Object} chatroom
  */
-const getChatRoomByRoomId = async function (roomId) {
-  const room = await RoomModel.findById(roomId);
-  return room;
+const getChatRoomByRoomId = async (roomId) => {
+  return RoomModel.findById(roomId);
 };
 
 module.exports = { getRecentChatRoomsByUserId, initiateChatRoom, getChatRoomByRoomId };

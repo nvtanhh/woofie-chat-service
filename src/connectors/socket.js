@@ -44,7 +44,6 @@ class SocketManager {
    * @param {Function} next
    */
   _checkUser = async (socket, next) => {
-    logger.debug('_checking User');
     try {
       const { token } = socket.handshake.query;
       if (!token) {
@@ -80,40 +79,32 @@ class SocketManager {
    */
   _onConnection = async (socket) => {
     // join to room of this user to support multi devices
-    await socket.join(this._getUserRoom(this.users[socket.id]));
+    await socket.join(this.users[socket.id]);
     await setActiveUser(this.users[socket.id]);
     logger.debug(`Socket Connected ====> ${this.users[socket.id]}`);
 
     // event fired when the chat room is disconnected
     socket.on('disconnect', async () => {
       await setInactiveUser(this.users[socket.id]);
+      socket.leave(this.users[socket.id]);
       delete this.users[socket.id];
     });
 
-    socket.on('typing', (receiver) => this._handleTypingEvent(receiver, this.users[socket.id]));
+    socket.on('typing', (data) => this._handleTypingEvent(data, this.users[socket.id]));
 
     socket.emit('authenticated', { success: true });
   };
 
-  _handleTypingEvent(receiver, data) {
-    logger.debug('_handleTypingEvent');
-    this.sendUserEvent(receiver, 'is-typing', data);
+  _handleTypingEvent(comingData, data) {
+    const { receiver, isTyping } = comingData;
+    this.sendUserEvent(receiver, 'is-typing', {
+      isTyping,
+      userUuid: data,
+    });
   }
 
-  /**
-   * @param {string} id user id
-   * @returns {string}
-   */
-  _getUserRoom(id) {
-    return `/private-chat/${id}`;
-  }
-
-  /**
-   * @param {string} id user id
-   * @returns {string}
-   */
-  _getGroup(id) {
-    return `/group/${id}`;
+  sendNewMessageToPrivateChat(receiver, messageCreatorId, message) {
+    this.sendUserEvent(receiver, 'new-message', { creator: messageCreatorId, message });
   }
 
   /**
@@ -123,8 +114,7 @@ class SocketManager {
    * @returns
    */
   sendUserEvent(userId, eventName, ...data) {
-    if (Object.values(this.users).indexOf(userId) > -1)
-      return this._io.to(this._getUserRoom(userId)).emit(eventName, ...data);
+    if (Object.values(this.users).indexOf(userId) > -1) return this._io.to(userId).emit(eventName, ...data);
   }
 
   // /**
@@ -136,10 +126,6 @@ class SocketManager {
   // sendGroupEvent(groupId, eventName, ...data) {
   //   return this._io.to(this._getGroup(groupId)).emit(eventName, ...data);
   // }
-
-  sendNewMessage(groupId, ...data) {
-    return this.sendGroupEvent(groupId, 'new-message', ...data);
-  }
 
   // sendNewMember(groupId, ...data) {
   //   return this.sendGroupEvent(groupId, 'NewMember', ...data);

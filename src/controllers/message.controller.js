@@ -31,15 +31,15 @@ const createNewMessage = async (req, res) => {
   try {
     const loggedInUserId = req.userId;
     const { roomId } = req.params;
-    const chatRoom = roomService.getChatRoomByRoomId(roomId);
+    const chatRoom = await roomService.getChatRoomByRoomId(roomId);
     if (!chatRoom) {
       return res.status(400).json({ message: 'Initiate chat room failed!' });
     }
     const message = pick(req.body, ['content', 'type', 'description']);
-    const newMessage = await messageService.createNewMessage(roomId, message, loggedInUserId);
-    const newMessageJson = newMessage.toJSON();
-    if (newMessage) {
-      socketManager.sendUserEvent(loggedInUserId, 'new-message', newMessageJson);
+    const newMessage = (await messageService.createNewMessage(roomId, message, loggedInUserId)).toJSON();
+    if (!chatRoom.isGroup) {
+      const partnerId = chatRoom.name.replace(loggedInUserId, '').replace('_', '');
+      socketManager.sendNewMessageToPrivateChat(partnerId, loggedInUserId, newMessage);
     }
     return res.status(201).json({ new_message: newMessage });
   } catch (error) {

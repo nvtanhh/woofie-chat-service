@@ -21,14 +21,13 @@ const getMessagesByRoomId = async (chatRoomId, options) => {
  * @param {String} senderId - user's ID who is posting the message
  * @returns {Object} new message
  */
-const createNewMessage = async function (chatRoomId, message, senderId) {
+const createNewMessage = async (chatRoomId, message, senderId) => {
   return Message.create({
     chatRoomId,
     content: message.content,
     type: message.type,
     sender: senderId,
     description: message.description,
-    // readByRecipients: { reader: senderId },
   });
 };
 
