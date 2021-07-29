@@ -1,6 +1,5 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
 
 const socketio = require('socket.io');
 const redis = require('socket.io-redis');
@@ -9,6 +8,7 @@ const { allowOrigins } = require('../config/config');
 // const { Member } = require('@models');
 const { redisClient, setActiveUser, setInactiveUser } = require('./redis');
 const { getUser } = require('./socket_auth');
+const logger = require('../config/logger');
 
 class SocketManager {
   constructor() {
@@ -44,27 +44,33 @@ class SocketManager {
    * @param {Function} next
    */
   _checkUser = async (socket, next) => {
+    logger.debug('_checking User');
     try {
-      if (!socket.handshake.query.token) {
+      const { token } = socket.handshake.query;
+      if (!token) {
         return next(new Error('Unauthorization'));
       }
 
       try {
-        if (socket.handshake.query.token) {
-          const userUuid = await getUser(socket.handshake.query.token);
-          if (!userUuid) {
-            throw new Error();
-          }
-          this.users[socket.id] = userUuid;
+        if (token) {
+          let userUuid;
+          getUser(token).then((user) => {
+            userUuid = user;
+            if (!userUuid) {
+              throw new Error();
+            }
+            this.users[socket.id] = userUuid;
+            next();
+          });
         } else throw new Error();
-        next();
       } catch (_) {
-        socket.emit('authenticated', { success: false });
+        logger.error('Socket Unauthorized User');
+        socket.emit('authenticated', { status: true });
         next(new Error('Unauthorization'));
       }
     } catch (error) {
-      console.error(error);
-      socket.emit('authenticated', { success: false });
+      logger.error(error);
+      socket.emit('authenticated', { status: false });
       next(new Error('Internal Error'));
     }
   };
@@ -75,8 +81,8 @@ class SocketManager {
   _onConnection = async (socket) => {
     // join to room of this user to support multi devices
     await socket.join(this._getUserRoom(this.users[socket.id]));
-
     await setActiveUser(this.users[socket.id]);
+    logger.debug(`Socket Connected ====> ${this.users[socket.id]}`);
 
     // event fired when the chat room is disconnected
     socket.on('disconnect', async () => {
@@ -84,12 +90,15 @@ class SocketManager {
       delete this.users[socket.id];
     });
 
-    socket.on('typing', (data) => {
-      this.sendUserEvent(data.partnerId, 'is-typing');
-    });
+    socket.on('typing', (receiver) => this._handleTypingEvent(receiver, this.users[socket.id]));
 
     socket.emit('authenticated', { success: true });
   };
+
+  _handleTypingEvent(receiver, data) {
+    logger.debug('_handleTypingEvent');
+    this.sendUserEvent(receiver, 'is-typing', data);
+  }
 
   /**
    * @param {string} id user id
@@ -114,8 +123,8 @@ class SocketManager {
    * @returns
    */
   sendUserEvent(userId, eventName, ...data) {
-    const receiver = this._getUserRoom(userId);
-    if (receiver in this.users) return this._io.to(this._getUserRoom(userId)).emit(eventName, ...data);
+    if (Object.values(this.users).indexOf(userId) > -1)
+      return this._io.to(this._getUserRoom(userId)).emit(eventName, ...data);
   }
 
   // /**

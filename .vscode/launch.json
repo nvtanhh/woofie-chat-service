@@ -8,6 +8,7 @@
       "type": "pwa-node",
       "request": "launch",
       "name": "Launch Program",
+      "outputCapture": "std",
       "runtimeExecutable": "yarn",
       "skipFiles": ["<node_internals>/**"],
       "runtimeArgs": ["dev"]

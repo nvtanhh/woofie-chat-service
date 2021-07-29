@@ -31,7 +31,7 @@ function setActiveUser(userId, client = null) {
   if (!client) client = redisClient;
 
   const key = `${redisPrefix.activeUser}${userId}`;
-  logger.info(`Active user ${userId}`);
+  logger.debug(`Active user ${userId}`);
   return redisClient.set(key, 'true', 'EX', 5 * 60);
 }
 /**
@@ -39,7 +39,7 @@ function setActiveUser(userId, client = null) {
  */
 function setInactiveUser(userId) {
   const key = `${redisPrefix.activeUser}${userId}`;
-  logger.info(`Inactive user ${userId}`);
+  logger.debug(`Inactive user ${userId}`);
   return redisClient.get(key);
 }
 

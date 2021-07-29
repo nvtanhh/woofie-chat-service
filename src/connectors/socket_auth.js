@@ -21,11 +21,15 @@ const options = { audience: config.jwt.audience, issuer: config.jwt.issuer, algo
  * @returns {Promise<import('@t/auth').UserInfo>}
  */
 const getUser = async function (token) {
-  jwt.verify(token, getKey, options, function (err, payload) {
-    if (!err && payload && payload.sub) {
-      const userUuid = payload.sub;
-      return userUuid;
-    }
+  return new Promise((resolve) => {
+    jwt.verify(token, getKey, options, function (err, payload) {
+      if (!err && payload && payload.sub) {
+        const userUuid = payload.sub;
+        resolve(userUuid);
+      } else {
+        resolve(null);
+      }
+    });
   });
 };
 
