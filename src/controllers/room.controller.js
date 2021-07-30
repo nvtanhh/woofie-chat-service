@@ -3,6 +3,11 @@ const { roomService, messageService } = require('../services');
 
 const FirstTimeMessagesCount = 10;
 
+const firstTimeGetMessageOptions = {
+  skip: 0,
+  limit: FirstTimeMessagesCount,
+};
+
 // const _toMessageViewModel = (message, userId) => {
 //   return {
 //     content: message.content,
@@ -18,10 +23,6 @@ const getRecentChatRooms = async (req, res) => {
     const options = pick(req.query, ['limit', 'skip']);
     const roomsRaw = await roomService.getRecentChatRoomsByUserId(loggedUserId, options);
     const rooms = roomsRaw.map((room) => room.toJSON());
-    const firstTimeGetMessageOptions = {
-      page: 0,
-      limit: FirstTimeMessagesCount,
-    };
     await Promise.all(
       rooms.map(async (room, index) => {
         const messages = await messageService.getMessagesByRoomId(room.id, firstTimeGetMessageOptions);
@@ -43,8 +44,14 @@ const initiateChatRoom = async (req, res) => {
     if (members.length === 0) {
       return res.status(400).json({ error: 'You must add at least one member to the chat room.' });
     }
+    if (creatorId === members.first) {
+      return res.status(400).json({ error: 'You cannot add yourself as a member.' });
+    }
     members.push(creatorId);
     const chatRoom = await roomService.initiateChatRoom(members, creatorId, isGroup);
+    const messages = await messageService.getMessagesByRoomId(chatRoom.id, firstTimeGetMessageOptions);
+    const messageViewModels = messages.map((message) => message.toJSON());
+    chatRoom.messages = messageViewModels;
     return res.status(200).json({ chatRoom });
   } catch (error) {
     return res.status(500).json({ error });

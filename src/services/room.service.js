@@ -27,24 +27,12 @@ const initiateChatRoom = async function (members, creatorId, isGroup = false) {
   });
 
   if (availableRoom) {
-    return {
-      isNew: false,
-      message: 'retrieve an old chat room',
-      chatRoomId: availableRoom._id,
-      chatRoomName: availableRoom.name,
-      isGroup: availableRoom.isGroup,
-    };
+    return availableRoom.toJSON();
   }
   // is private chat
   if (!isGroup && members.length === 2) {
     const newRoom = await RoomModel.create({ name: `${creatorId}_${members[0]}`, members, isGroup, creator: creatorId });
-    return {
-      isNew: true,
-      message: 'create a new chatroom',
-      chatRoomId: newRoom._id,
-      chatRoomName: newRoom.name,
-      isGroup: newRoom.isGroup,
-    };
+    return newRoom.toJSON();
   }
 };
 
