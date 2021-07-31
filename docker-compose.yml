@@ -15,8 +15,8 @@ services:
       - mongodb
       - redis
     volumes:
-      # - ./runzone/node-app:/code
       - .:/usr/src/node-app
+      - /usr/src/node-app/node_modules
     networks:
       - woofie-chat-network
 
