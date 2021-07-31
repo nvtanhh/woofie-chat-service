@@ -19,6 +19,7 @@ const createNewMessage = {
     content: Joi.string().required(),
     type: Joi.string().default('T').custom(isMessageType),
     description: Joi.string(),
+    createdAt: Joi.string(),
   }),
 };
 

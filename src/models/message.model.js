@@ -28,9 +28,10 @@ const messageSchema = new mongoose.Schema(
       default: 'T',
     },
     sender: String,
+    created: { type: Date, default: Date.now },
   },
   {
-    timestamps: true,
+    timestamps: false,
   }
 );
 

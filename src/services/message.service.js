@@ -10,7 +10,7 @@ const getMessagesByRoomId = async (chatRoomId, options) => {
     .sort('-createdAt')
     .skip(options.skip)
     .limit(options.limit)
-    .select('-__v -updatedAt -chatRoomId -readByRecipients');
+    .select('-__v -updatedAt -readByRecipients');
 };
 
 /**
@@ -28,6 +28,7 @@ const createNewMessage = async (chatRoomId, message, senderId) => {
     type: message.type,
     sender: senderId,
     description: message.description,
+    createdAt: message.createdAt,
   });
 };
 

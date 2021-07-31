@@ -33,9 +33,9 @@ const createNewMessage = async (req, res) => {
     const { roomId } = req.params;
     const chatRoom = await roomService.getChatRoomByRoomId(roomId);
     if (!chatRoom) {
-      return res.status(400).json({ message: 'Initiate chat room failed!' });
+      return res.status(400).json({ message: "Can't find your chat room!" });
     }
-    const message = pick(req.body, ['content', 'type', 'description']);
+    const message = pick(req.body, ['content', 'type', 'description', 'createdAt']);
     const newMessage = (await messageService.createNewMessage(roomId, message, loggedInUserId)).toJSON();
     if (!chatRoom.isGroup) {
       const partnerId = chatRoom.name.replace(loggedInUserId, '').replace('_', '');
