@@ -10,13 +10,13 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     ports:
-      - 3000:3000
+      - 22031:3000
     depends_on:
       - mongodb
       - redis
     volumes:
-      - ./runzone/node-app/server:/code
-      # - ./runzone/node-app/server:/usr/src/node-app
+      # - ./runzone/node-app:/code
+      - .:/usr/src/node-app
     networks:
       - woofie-chat-network
 
@@ -25,7 +25,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./runzone/storage/mongo/data:/data/db
+      - mongodb-data:/data/db
     networks:
       - woofie-chat-network
 
@@ -35,12 +35,13 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - ./runzone/storage/redis/data:/data
+      - redis-data:/data
     networks:
       - woofie-chat-network
 
 volumes:
-  dbdata:
+  mongodb-data:
+  redis-data:
 
 networks:
   woofie-chat-network:
