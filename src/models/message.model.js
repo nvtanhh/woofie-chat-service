@@ -28,7 +28,7 @@ const messageSchema = new mongoose.Schema(
       default: 'T',
     },
     sender: String,
-    created: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
   },
   {
     timestamps: false,
