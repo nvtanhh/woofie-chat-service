@@ -17,13 +17,13 @@ const getRecentChatRooms = async (req, res) => {
     await Promise.all(
       rooms.map(async (room, index) => {
         const messages = await messageService.getMessagesByRoomId(room.id, firstTimeGetMessageOptions);
-        if (messages.length === 0) {
-          const i = rooms.indexOf(room);
-          if (i !== -1) {
-            rooms.splice(i, 1);
-          }
-          return;
-        }
+        // if (messages.length === 0) {
+        //   const i = rooms.indexOf(room);
+        //   if (i !== -1) {
+        //     rooms.splice(i, 1);
+        //   }
+        //   return;
+        // }
 
         const messageViewModels = messages.map((message) => message.toJSON());
         rooms[index].messages = messageViewModels;

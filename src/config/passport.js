@@ -1,6 +1,5 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 const jwksRsa = require('jwks-rsa');
-const logger = require('./logger');
 const config = require('./config');
 // const { tokenTypes } = require('./tokens');
 // const { User } = require('../models');
@@ -23,7 +22,6 @@ const jwtOptions = {
 
 const jwtVerify = async (payload, done) => {
   try {
-    logger.info(`Verify user: ${payload}`);
     if (!(payload && payload.sub)) {
       return done(null, false);
     }
