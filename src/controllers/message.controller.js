@@ -41,6 +41,7 @@ const createNewMessage = async (req, res) => {
       const partnerId = chatRoom.name.replace(loggedInUserId, '').replace('_', '');
       socketManager.sendNewMessageToPrivateChat(partnerId, loggedInUserId, newMessage);
     }
+    chatRoom.save();
     return res.status(201).json({ new_message: newMessage });
   } catch (error) {
     return res.status(500).json({ error });

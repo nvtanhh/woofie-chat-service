@@ -6,11 +6,7 @@ const Message = require('../models/message.model');
  * @return {Array} array of message of the roomId
  */
 const getMessagesByRoomId = async (chatRoomId, options) => {
-  return Message.find({ chatRoomId })
-    .sort('-createdAt')
-    .skip(options.skip)
-    .limit(options.limit)
-    .select('-__v -updatedAt -readByRecipients');
+  return Message.find({ chatRoomId }).sort('-createdAt').skip(options.skip).limit(options.limit);
 };
 
 /**

@@ -7,6 +7,7 @@ const RoomModel = require('../models/room.model');
  */
 const getRecentChatRoomsByUserId = async (userId, options) => {
   return RoomModel.find({ members: { $all: [userId] } })
+    .sort('-updatedAt')
     .skip(options.skip)
     .limit(options.limit);
 };

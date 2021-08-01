@@ -15,6 +15,12 @@ const roomSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+roomSchema.pre('save', function (next) {
+  this.updatedAt = Date.now();
+  return next();
+});
+
 roomSchema.method('toJSON', function () {
   const obj = this.toObject();
   obj.id = obj._id;
