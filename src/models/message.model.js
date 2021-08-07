@@ -24,7 +24,7 @@ const messageSchema = new mongoose.Schema(
     description: mongoose.Schema.Types.String,
     type: {
       type: String,
-      enum: ['T', 'I', 'V'],
+      enum: ['T', 'I', 'V', 'P'], // text, image, video, post
       default: 'T',
     },
     sender: String,

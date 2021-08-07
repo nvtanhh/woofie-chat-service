@@ -16,7 +16,7 @@ const password = (value, helpers) => {
 };
 
 const isMessageType = (value, helpers) => {
-  const types = ['T', 'I', 'V'];
+  const types = ['T', 'I', 'V', 'P'];
   if (types.includes(value)) return value;
   return helpers.message(`Valid type is ${types}`);
 };
