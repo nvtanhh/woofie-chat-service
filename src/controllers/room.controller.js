@@ -11,24 +11,20 @@ const firstTimeGetMessageOptions = {
 const getRecentChatRooms = async (req, res) => {
   try {
     const loggedUserId = req.userId;
-    const options = pick(req.query, ['limit', 'skip']);
+    const options = pick(req.query, ['limit', 'skip', 'acceptEmptyChatRoom']);
     const roomsRaw = await roomService.getRecentChatRoomsByUserId(loggedUserId, options);
-    const rooms = roomsRaw.map((room) => room.toJSON());
+    let rooms = roomsRaw.map((room) => room.toJSON());
     await Promise.all(
       rooms.map(async (room, index) => {
         const messages = await messageService.getMessagesByRoomId(room.id, firstTimeGetMessageOptions);
-        // if (messages.length === 0) {
-        //   const i = rooms.indexOf(room);
-        //   if (i !== -1) {
-        //     rooms.splice(i, 1);
-        //   }
-        //   return;
-        // }
-
         const messageViewModels = messages.map((message) => message.toJSON());
         rooms[index].messages = messageViewModels;
       })
     );
+
+    if (!options.acceptEmptyChatRoom) {
+      rooms = rooms.filter((room) => room.messages.length > 0);
+    }
 
     return res.status(200).json({ rooms });
   } catch (error) {

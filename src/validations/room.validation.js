@@ -4,6 +4,7 @@ const getRecentChatRooms = {
   query: Joi.object().keys({
     limit: Joi.number().integer().default(10),
     skip: Joi.number().integer().default(0),
+    acceptEmptyChatRoom: Joi.boolean().default(true),
   }),
 };
 
