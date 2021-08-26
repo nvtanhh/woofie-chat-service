@@ -49,8 +49,9 @@ class SocketManager {
       let userUuid;
       await getUser(token).then((user) => {
         userUuid = user;
-        if (!userUuid) {
+        if (userUuid) {
           this.users[socket.id] = userUuid;
+          logger.info('Socket Authorized User ===> OK');
           next();
         }
       });
