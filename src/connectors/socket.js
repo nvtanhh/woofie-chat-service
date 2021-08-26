@@ -44,34 +44,23 @@ class SocketManager {
    * @param {Function} next
    */
   _checkUser = async (socket, next) => {
-    try {
-      const { token } = socket.handshake.query;
-      if (!token) {
-        return next(new Error('Unauthorization'));
+    const { token } = socket.handshake.query;
+    if (token) {
+      let userUuid;
+      await getUser(token).then((user) => {
+        userUuid = user;
+        if (!userUuid) {
+          this.users[socket.id] = userUuid;
+          next();
+        }
+      });
+      if (userUuid) {
+        return;
       }
-
-      try {
-        if (token) {
-          let userUuid;
-          getUser(token).then((user) => {
-            userUuid = user;
-            if (!userUuid) {
-              throw new Error();
-            }
-            this.users[socket.id] = userUuid;
-            next();
-          });
-        } else throw new Error();
-      } catch (_) {
-        logger.error('Socket Unauthorized User');
-        socket.emit('authenticated', { status: true });
-        next(new Error('Unauthorization'));
-      }
-    } catch (error) {
-      logger.error(error);
-      socket.emit('authenticated', { status: false });
-      next(new Error('Internal Error'));
     }
+    logger.error('Socket Unauthorized User');
+    socket.emit('authenticated', { status: true });
+    next(new Error('unauthorization'));
   };
 
   /**
@@ -79,20 +68,24 @@ class SocketManager {
    */
   _onConnection = async (socket) => {
     // join to room of this user to support multi devices
-    await socket.join(this.users[socket.id]);
-    await setActiveUser(this.users[socket.id]);
-    logger.debug(`Socket Connected ====> ${this.users[socket.id]}`);
+    if (this.users[socket.id]) {
+      await socket.join(this.users[socket.id]);
+      await setActiveUser(this.users[socket.id]);
+      logger.debug(`Socket Connected ====> ${this.users[socket.id]}`);
 
-    // event fired when the chat room is disconnected
-    socket.on('disconnect', async () => {
-      await setInactiveUser(this.users[socket.id]);
-      socket.leave(this.users[socket.id]);
-      delete this.users[socket.id];
-    });
+      // event fired when the chat room is disconnected
+      socket.on('disconnect', async () => {
+        await setInactiveUser(this.users[socket.id]);
+        socket.leave(this.users[socket.id]);
+        delete this.users[socket.id];
+      });
 
-    socket.on('typing', (data) => this._handleTypingEvent(data, this.users[socket.id]));
+      socket.on('typing', (data) => this._handleTypingEvent(data, this.users[socket.id]));
 
-    socket.emit('authenticated', { success: true });
+      socket.emit('authenticated', { success: true });
+    } else {
+      socket.emit('authenticated', { success: false });
+    }
   };
 
   _handleTypingEvent(comingData, data) {
