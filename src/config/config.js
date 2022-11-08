@@ -13,8 +13,6 @@ const envVarsSchema = Joi.object()
     JWT_AUDIENCE: Joi.string().required(),
     JWT_ISSUER: Joi.string().required(),
     JWT_ALGORITHMES: Joi.string().required(),
-    REDIS_HOST: Joi.string().required().description('Redis host'),
-    REDIS_PORT: Joi.number().required().description('Redis port'),
     ALLOW_ORIGINS: Joi.string().empty('').default('*').description('Allowed origins for CORS'),
   })
   .unknown();
@@ -41,10 +39,6 @@ module.exports = {
     audience: envVars.JWT_AUDIENCE,
     issuer: envVars.JWT_ISSUER,
     algorithms: envVars.JWT_ALGORITHMES.split(' '),
-  },
-  redis: {
-    host: envVars.REDIS_HOST,
-    port: envVars.REDIS_PORT,
   },
   allowOrigins: envVars.ALLOW_ORIGINS ?? '*',
 };

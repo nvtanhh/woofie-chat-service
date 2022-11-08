@@ -1,17 +1,11 @@
 version: '3.2'
 
 services:
-  # mongodb:
-  #   container_name: woofiedb
-  #   image: mongo
-  #   ports:
-  #     - 27017:27017
-  #   restart: always
-  redis:
-    container_name: woofieredis
-    image: redis
+  mongodb:
+    container_name: woofiedb
+    image: mongo
     ports:
-      - 6379:6379
+      - 27017:27017
     restart: always
 
 networks:

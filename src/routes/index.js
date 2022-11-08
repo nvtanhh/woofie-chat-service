@@ -16,7 +16,7 @@ const defaultRoutes = [
   },
 ];
 
-router.get('/ping', (req, res) => {
+router.get('/ping', (_, res) => {
   res.status(200).json({ message: `pong` });
 });
 

@@ -54,7 +54,7 @@ passport.use('jwt', jwtStrategy);
 app.use('/api', routes);
 
 // send back a 404 error for any unknown api request
-app.use((req, res, next) => {
+app.use((_, __, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
 
