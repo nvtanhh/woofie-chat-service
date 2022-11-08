@@ -2,8 +2,11 @@
 /* eslint-disable no-unused-vars */
 
 const socketio = require('socket.io');
+const redis = require('socket.io-redis');
 const { allowOrigins } = require('../config/config');
 
+// const { Member } = require('@models');
+const { redisClient, setActiveUser, setInactiveUser } = require('./redis');
 const { getUser } = require('./socket_auth');
 const logger = require('../config/logger');
 
@@ -23,6 +26,14 @@ class SocketManager {
       //   methods: ['GET', 'POST'],
       // },
     });
+
+    const subClient = redisClient.duplicate();
+    this._io.adapter(
+      redis({
+        pubClient: redisClient,
+        subClient,
+      })
+    );
 
     this._io.use(this._checkUser);
     this._io.on('connection', this._onConnection);
@@ -60,10 +71,12 @@ class SocketManager {
     // join to room of this user to support multi devices
     if (this.users[socket.id]) {
       await socket.join(this.users[socket.id]);
+      await setActiveUser(this.users[socket.id]);
       logger.debug(`Socket Connected ====> ${this.users[socket.id]}`);
 
       // event fired when the chat room is disconnected
       socket.on('disconnect', async () => {
+        await setInactiveUser(this.users[socket.id]);
         socket.leave(this.users[socket.id]);
         delete this.users[socket.id];
       });
