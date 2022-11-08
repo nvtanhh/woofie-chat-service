@@ -40,7 +40,7 @@ const initiateChatRoom = async (req, res) => {
       return res.status(400).json({ error: 'You must add at least one member to the chat room.' });
     }
     if (creatorId === members.first) {
-      return res.status(400).json({ error: 'You cannot add your self as a member.' });
+      return res.status(400).json({ error: 'You cannot add yourself as a member.' });
     }
     members.push(creatorId);
     const chatRoom = await roomService.initiateChatRoom(members, creatorId, isGroup);
