@@ -10,7 +10,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     ports:
-      - 22031:3000
+      - 21052:3000
     depends_on:
       - redis
     volumes:
