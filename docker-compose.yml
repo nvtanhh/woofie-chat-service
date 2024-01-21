@@ -5,29 +5,19 @@ services:
     build: .
     image: node-app
     environment:
-      - MONGODB_URL=mongodb://mongodb:27017/woofie-chat
+      - MONGODB_URL=mongodb://172.17.0.1:21051/xfactor
       - PORT=3000
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     ports:
       - 22031:3000
     depends_on:
-      - mongodb
       - redis
     volumes:
       - .:/usr/src/node-app
       - /usr/src/node-app/node_modules
     networks:
-      - woofie-chat-network
-
-  mongodb:
-    image: mongo:4.2.1-bionic
-    ports:
-      - 27017:27017
-    volumes:
-      - mongodb-data:/data/db
-    networks:
-      - woofie-chat-network
+      - xfactor
 
   redis:
     container_name: woofie-redis
@@ -37,12 +27,11 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - woofie-chat-network
+      - xfactor
 
 volumes:
-  mongodb-data:
   redis-data:
 
 networks:
-  woofie-chat-network:
+  xfactor:
     driver: bridge
